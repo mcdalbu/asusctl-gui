@@ -1,0 +1,12 @@
+[Desktop Entry]
+Name=ASUS Control
+GenericName=ASUS Laptop Control Panel
+Comment=Manage power profiles, battery, and hardware settings via asusd
+Exec=asusctl-gui
+Icon=asusctl-gui
+Terminal=false
+Type=Application
+Categories=Settings;HardwareSettings;System;
+Keywords=asus;asusd;asusctl;fan;battery;power;rog;profile;
+StartupWMClass=asusctl-gui
+X-GNOME-UsesNotifications=false

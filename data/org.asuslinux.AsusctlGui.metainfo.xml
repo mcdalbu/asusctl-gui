@@ -1,0 +1,21 @@
+Name=org.asuslinux.AsusctlGui
+Name[pt_BR]=org.asuslinux.AsusctlGui
+Name[es]=org.asuslinux.AsusctlGui
+Version=1
+Summary=ASUS Laptop Control GUI
+Summary[pt_BR]=Interface gráfica para controle de laptops ASUS
+Summary[es]=Interfaz gráfica para control de laptops ASUS
+Description=
+	A graphical front-end for the asusd daemon that allows managing power profiles,
+	battery charge limits, charging mode, and backlight settings on ASUS laptops.
+	Requires asusctl to be installed.
+Description[pt_BR]=
+	Interface gráfica para o daemon asusd. Permite gerenciar perfis de energia,
+	limite de carga da bateria, modo de carregamento e brilho em laptops ASUS.
+	Requer que o asusctl esteja instalado.
+Url=https://asus-linux.org
+SetupDesktopFile=asusctl-gui.desktop
+Screenshots=
+
+[PolicyKit]
+DefaultAction=auth_self_keep

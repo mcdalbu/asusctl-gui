@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <defs>
+    <linearGradient id="bg-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#141428;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0d0d1a;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="rog-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#e8294a;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#00d4ff;stop-opacity:1" />
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background circle -->
+  <circle cx="64" cy="64" r="60" fill="url(#bg-grad)" />
+  <circle cx="64" cy="64" r="60" fill="none" stroke="url(#rog-grad)" stroke-width="2" opacity="0.6"/>
+
+  <!-- ROG eye / power symbol styled icon -->
+  <!-- Outer ring segments -->
+  <path d="M64 18 A46 46 0 0 1 110 64" fill="none" stroke="#e8294a" stroke-width="6" stroke-linecap="round" filter="url(#glow)"/>
+  <path d="M110 64 A46 46 0 0 1 64 110" fill="none" stroke="#c01f38" stroke-width="4" stroke-linecap="round"/>
+  <path d="M64 110 A46 46 0 0 1 18 64" fill="none" stroke="#009ab8" stroke-width="4" stroke-linecap="round"/>
+  <path d="M18 64 A46 46 0 0 1 64 18" fill="none" stroke="#00d4ff" stroke-width="6" stroke-linecap="round" filter="url(#glow)"/>
+
+  <!-- Inner power icon -->
+  <!-- Vertical bar -->
+  <rect x="61" y="28" width="6" height="28" rx="3" fill="url(#rog-grad)" filter="url(#glow)"/>
+  <!-- Power arc -->
+  <path d="M42 50 A26 26 0 1 0 86 50" fill="none" stroke="url(#rog-grad)" stroke-width="6" stroke-linecap="round" filter="url(#glow)"/>
+
+  <!-- Center dot -->
+  <circle cx="64" cy="64" r="5" fill="#e8294a" filter="url(#glow)"/>
+</svg>

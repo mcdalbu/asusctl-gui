@@ -1,0 +1,11 @@
+# Python
+__pycache__/
+*.pyc
+
+# Distribution
+*.rpm
+*.tar.gz
+*.src.rpm
+
+# Misc
+.DS_Store
