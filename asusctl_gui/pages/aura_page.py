@@ -27,12 +27,13 @@ AURA_EFFECTS = {
 class AuraPage(Gtk.Box):
     """Page to set the hardware aura effect."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, has_aura: bool = False, **kwargs):
         super().__init__(
             orientation=Gtk.Orientation.VERTICAL,
             spacing=0,
             **kwargs,
         )
+        self._has_aura = has_aura
         self._build_ui()
 
     def _build_ui(self):
@@ -64,6 +65,23 @@ class AuraPage(Gtk.Box):
         content = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=16)
         content.add_css_class("page-content")
         scroll.set_child(content)
+
+        if not self._has_aura:
+            status = Adw.StatusPage()
+            status.set_title("Aura Not Detected")
+            status.set_icon_name("software-update-available-symbolic")
+            status.set_description(
+                "Aura LED control requires a supported ASUS laptop and necessary dependencies.\n\n"
+                "To ensure it works on compatible models:\n"
+                "1. Check if 'asusd' is installed and running:\n"
+                "   sudo systemctl enable --now asusd\n"
+                "2. Install ASUS Linux extensions via Copr if needed:\n"
+                "   sudo dnf copr enable lukejones/asus-linux\n"
+                "   sudo dnf reinstall asusctl\n"
+                "3. Ensure your kernel supports 'hid-asus' modules."
+            )
+            content.append(status)
+            return
 
         # ── Effects List ───────────────────────────────────────────────────
         effects_group = Adw.PreferencesGroup()

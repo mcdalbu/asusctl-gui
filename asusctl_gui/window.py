@@ -132,13 +132,12 @@ class MainWindow(Adw.ApplicationWindow):
                 "display-brightness-symbolic",
                 BacklightPage(),
             )
-        if self._info.has_aura:
-            self._add_page(
-                "aura",
-                "Keyboard Aura",
-                "keyboard-brightness-symbolic",
-                AuraPage(),
-            )
+        self._add_page(
+            "aura",
+            "Keyboard Aura",
+            "keyboard-brightness-symbolic",
+            AuraPage(has_aura=self._info.has_aura),
+        )
         self._add_page(
             "info",
             "About",
