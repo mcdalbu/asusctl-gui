@@ -59,6 +59,7 @@ install -p -m 644 asusctl_gui/pages/__init__.py      %{buildroot}%{python3_sitel
 install -p -m 644 asusctl_gui/pages/profile_page.py  %{buildroot}%{python3_sitelib}/asusctl_gui/pages/
 install -p -m 644 asusctl_gui/pages/battery_page.py  %{buildroot}%{python3_sitelib}/asusctl_gui/pages/
 install -p -m 644 asusctl_gui/pages/backlight_page.py %{buildroot}%{python3_sitelib}/asusctl_gui/pages/
+install -p -m 644 asusctl_gui/pages/aura_page.py     %{buildroot}%{python3_sitelib}/asusctl_gui/pages/
 install -p -m 644 asusctl_gui/pages/info_page.py     %{buildroot}%{python3_sitelib}/asusctl_gui/pages/
 
 # Launcher binary
