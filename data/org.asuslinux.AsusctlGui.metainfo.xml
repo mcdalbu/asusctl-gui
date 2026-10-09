@@ -1,21 +1,25 @@
-Name=org.asuslinux.AsusctlGui
-Name[pt_BR]=org.asuslinux.AsusctlGui
-Name[es]=org.asuslinux.AsusctlGui
-Version=1
-Summary=ASUS Laptop Control GUI
-Summary[pt_BR]=Interface gráfica para controle de laptops ASUS
-Summary[es]=Interfaz gráfica para control de laptops ASUS
-Description=
-	A graphical front-end for the asusd daemon that allows managing power profiles,
-	battery charge limits, charging mode, and backlight settings on ASUS laptops.
-	Requires asusctl to be installed.
-Description[pt_BR]=
-	Interface gráfica para o daemon asusd. Permite gerenciar perfis de energia,
-	limite de carga da bateria, modo de carregamento e brilho em laptops ASUS.
-	Requer que o asusctl esteja instalado.
-Url=https://asus-linux.org
-SetupDesktopFile=asusctl-gui.desktop
-Screenshots=
-
-[PolicyKit]
-DefaultAction=auth_self_keep
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>org.asuslinux.AsusctlGui</id>
+  <name>ASUS Control</name>
+  <summary>Manage ASUS laptop power, battery and keyboard illumination</summary>
+  <summary xml:lang="pt_BR">Controle energia, bateria e iluminação do seu laptop ASUS</summary>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+  <launchable type="desktop-id">asusctl-gui.desktop</launchable>
+  <description>
+    <p>A native GTK4 and Libadwaita interface for ASUS laptops, including Vivobook S5406. Available controls are detected from asusd and UPower.</p>
+    <p xml:lang="pt_BR">Uma interface GTK4 e Libadwaita para laptops ASUS, incluindo o Vivobook S5406. Os controles disponíveis são detectados pelo asusd e pelo UPower.</p>
+    <ul>
+      <li>Power profiles and automatic AC/battery profiles</li>
+      <li>Battery charge limits and temporary full charge</li>
+      <li>Keyboard brightness through UPower</li>
+    </ul>
+  </description>
+  <developer id="org.asuslinux.asusctlgui"><name>ASUS Control contributors</name></developer>
+  <url type="homepage">https://github.com/OpenGamingCollective/asusctl</url>
+  <url type="help">https://github.com/OpenGamingCollective/asusctl</url>
+  <provides><binary>asusctl-gui</binary></provides>
+  <content_rating type="oars-1.1"/>
+  <releases><release version="1.1.0" date="2026-10-09"/></releases>
+</component>

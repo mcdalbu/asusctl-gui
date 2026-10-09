@@ -1,115 +1,54 @@
 Name:           asusctl-gui
-Version:        1.0.0
+Version:        1.1.0
 Release:        1%{?dist}
-Summary:        GTK4 graphical interface for the asusd/asusctl ASUS laptop daemon
-
-License:        GPLv3+
-URL:            https://asus-linux.org
+Summary:        GTK4/Libadwaita controls for ASUS Vivobook laptops
+License:        GPL-3.0-or-later
+URL:            https://github.com/OpenGamingCollective/asusctl
 Source0:        %{name}-%{version}.tar.gz
-
-# ── Build deps ─────────────────────────────────────────────────────────────────
 BuildArch:      noarch
-BuildRequires:  python3-setuptools
-
-%global python3_sitelib /usr/lib/python3.14/site-packages
-
-# ── Runtime deps ───────────────────────────────────────────────────────────────
+BuildRequires:  python3-devel
 Requires:       python3 >= 3.11
 Requires:       python3-gobject >= 3.42
 Requires:       gtk4 >= 4.10
 Requires:       libadwaita >= 1.4
-# The whole point — asusctl must be present
 Requires:       asusctl
+Requires:       upower
 
 %description
-asusctl-gui provides a modern GTK4/Adwaita graphical front-end for the
-asusd daemon on ASUS ROG and TUF laptops running Linux.
+Native GTK4/Libadwaita interface in Brazilian Portuguese for ASUS laptops,
+including Vivobook S5406. Controls available asusd power profiles, automatic
+profiles on AC/battery, battery charge limits, and keyboard brightness via
+UPower. Hardware capabilities are discovered without changing settings.
 
-It allows the user to:
-  • Switch between power profiles (Quiet / Balanced / Performance)
-  • Set and monitor battery charge limits (20–100 %)
-  • Configure charging mode via firmware attributes
-  • Adjust screenpad brightness and gamma
-  • View supported hardware features and asusd version info
-
-Feature detection is automatic: sections for unsupported hardware are hidden.
-
-# ── Prep ───────────────────────────────────────────────────────────────────────
 %prep
 %autosetup
 
-# ── Build ──────────────────────────────────────────────────────────────────────
 %build
-# Pure Python — nothing to compile.
+# Pure Python.
 
-# ── Install ────────────────────────────────────────────────────────────────────
 %install
-# Python package
-install -d %{buildroot}%{python3_sitelib}/asusctl_gui/backend
-install -d %{buildroot}%{python3_sitelib}/asusctl_gui/pages
+install -d %{buildroot}%{python3_sitelib}/asusctl_gui
+cp -pr asusctl_gui/. %{buildroot}%{python3_sitelib}/asusctl_gui/
+find %{buildroot}%{python3_sitelib}/asusctl_gui -type d -name __pycache__ -exec rm -rf {} +
+install -Dpm755 asusctl-gui-launcher.py %{buildroot}%{_bindir}/asusctl-gui
+install -Dpm644 data/asusctl-gui.desktop %{buildroot}%{_datadir}/applications/asusctl-gui.desktop
+install -Dpm644 data/asusctl-gui.svg %{buildroot}%{_datadir}/icons/hicolor/scalable/apps/asusctl-gui.svg
+install -Dpm644 data/org.asuslinux.AsusctlGui.metainfo.xml %{buildroot}%{_datadir}/metainfo/org.asuslinux.AsusctlGui.metainfo.xml
 
-install -p -m 644 asusctl_gui/__init__.py        %{buildroot}%{python3_sitelib}/asusctl_gui/
-install -p -m 644 asusctl_gui/main.py            %{buildroot}%{python3_sitelib}/asusctl_gui/
-install -p -m 644 asusctl_gui/window.py          %{buildroot}%{python3_sitelib}/asusctl_gui/
-install -p -m 644 asusctl_gui/style.css          %{buildroot}%{python3_sitelib}/asusctl_gui/
-install -p -m 644 asusctl_gui/backend/__init__.py  %{buildroot}%{python3_sitelib}/asusctl_gui/backend/
-install -p -m 644 asusctl_gui/backend/asusctl.py   %{buildroot}%{python3_sitelib}/asusctl_gui/backend/
-install -p -m 644 asusctl_gui/backend/system_info.py %{buildroot}%{python3_sitelib}/asusctl_gui/backend/
-install -p -m 644 asusctl_gui/pages/__init__.py      %{buildroot}%{python3_sitelib}/asusctl_gui/pages/
-install -p -m 644 asusctl_gui/pages/profile_page.py  %{buildroot}%{python3_sitelib}/asusctl_gui/pages/
-install -p -m 644 asusctl_gui/pages/battery_page.py  %{buildroot}%{python3_sitelib}/asusctl_gui/pages/
-install -p -m 644 asusctl_gui/pages/backlight_page.py %{buildroot}%{python3_sitelib}/asusctl_gui/pages/
-install -p -m 644 asusctl_gui/pages/aura_page.py     %{buildroot}%{python3_sitelib}/asusctl_gui/pages/
-install -p -m 644 asusctl_gui/pages/info_page.py     %{buildroot}%{python3_sitelib}/asusctl_gui/pages/
+%check
+%{__python3} -m unittest discover -s tests -v
 
-# Launcher binary
-install -d %{buildroot}%{_bindir}
-install -p -m 755 asusctl-gui-launcher.py %{buildroot}%{_bindir}/asusctl-gui
-
-# Desktop entry
-install -d %{buildroot}%{_datadir}/applications
-install -p -m 644 data/asusctl-gui.desktop \
-    %{buildroot}%{_datadir}/applications/asusctl-gui.desktop
-
-# Icon — scalable SVG
-install -d %{buildroot}%{_datadir}/icons/hicolor/scalable/apps
-install -p -m 644 data/asusctl-gui.svg \
-    %{buildroot}%{_datadir}/icons/hicolor/scalable/apps/asusctl-gui.svg
-
-# AppStream metainfo
-install -d %{buildroot}%{_datadir}/metainfo
-install -p -m 644 data/org.asuslinux.AsusctlGui.metainfo.xml \
-    %{buildroot}%{_datadir}/metainfo/
-
-# ── Post-install ───────────────────────────────────────────────────────────────
-%post
-/bin/touch --no-create %{_datadir}/icons/hicolor &>/dev/null || :
-
-%postun
-if [ $1 -eq 0 ] ; then
-    /bin/touch --no-create %{_datadir}/icons/hicolor &>/dev/null
-    /usr/bin/gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
-fi
-
-%posttrans
-/usr/bin/gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
-
-# ── Files ──────────────────────────────────────────────────────────────────────
 %files
 %license LICENSE
-%doc README.md
+%doc README.md docs/VALIDACAO.md
 %{python3_sitelib}/asusctl_gui/
 %{_bindir}/asusctl-gui
 %{_datadir}/applications/asusctl-gui.desktop
 %{_datadir}/icons/hicolor/scalable/apps/asusctl-gui.svg
 %{_datadir}/metainfo/org.asuslinux.AsusctlGui.metainfo.xml
 
-# ── Changelog ──────────────────────────────────────────────────────────────────
 %changelog
-* Thu Apr 09 2026 asusctl-gui Maintainer <noreply@asus-linux.org> - 1.0.0-1
-- Initial release for Fedora 43
-- Power profile switching (Quiet / Balanced / Performance)
-- Battery charge limit slider with live badge
-- Charge mode via armoury firmware attributes
-- Backlight / screenpad brightness control
-- Feature auto-detection based on supported asusd interfaces
+* Fri Oct 09 2026 ASUS Control contributors - 1.1.0-1
+- Vivobook capability discovery, UPower keyboard brightness and native adaptive UI
+- Report backend failures and remove unsupported ScreenPad/Aura controls
+- Use distribution Python macros and valid AppStream metadata

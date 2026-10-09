@@ -1,290 +1,157 @@
-"""
-asusctl.py
-──────────
-Subprocess wrapper around the `asusctl` CLI.
-
-All public functions return plain Python dicts/values and raise
-AsusctlError on failure.  Long-running calls should be dispatched
-from a GLib thread pool; these functions themselves are synchronous.
-"""
-
+"""Read-only capability discovery and validated calls to the installed asusctl CLI."""
+from dataclasses import dataclass, field
+from pathlib import Path
+import os
 import re
 import subprocess
-import shutil
-from dataclasses import dataclass, field
-from typing import Optional
 
-
-# ─── Exception ────────────────────────────────────────────────────────────────
 
 class AsusctlError(Exception):
-    """Raised when asusctl exits with a non-zero status or returns unexpected output."""
+    """A hardware operation failed or returned an unrecognised response."""
 
 
-# ─── Helpers ──────────────────────────────────────────────────────────────────
+def _clean(output: str) -> str:
+    # Some asusctl releases log D-Bus handshakes even with RUST_LOG=error.
+    return "\n".join(line for line in output.splitlines()
+                     if not re.match(r"^\[(?:INFO|DEBUG|TRACE)\b", line)).strip()
+
 
 def _run(*args: str, timeout: int = 10) -> str:
-    """Run `asusctl <args>` and return stdout as a stripped string."""
-    cmd = ["asusctl", *args]
     try:
-        result = subprocess.run(
-            cmd,
-            capture_output=True,
-            text=True,
-            timeout=timeout,
-        )
-        # asusd writes some errors to stdout; check explicitly
-        combined = result.stdout + result.stderr
-        if result.returncode != 0 and "Error" in combined:
-            raise AsusctlError(combined.strip())
-        return result.stdout.strip()
-    except FileNotFoundError:
-        raise AsusctlError("asusctl not found — is asusctl installed?")
-    except subprocess.TimeoutExpired:
-        raise AsusctlError(f"asusctl timed out running: {' '.join(cmd)}")
+        result = subprocess.run(["asusctl", *args], capture_output=True, text=True,
+                                timeout=timeout,
+                                env={**os.environ, "LC_ALL": "C", "RUST_LOG": "error"})
+    except FileNotFoundError as exc:
+        raise AsusctlError("asusctl não encontrado. Instale o pacote asusctl.") from exc
+    except subprocess.TimeoutExpired as exc:
+        raise AsusctlError("O asusd demorou demais para responder.") from exc
+    except OSError as exc:
+        raise AsusctlError(str(exc)) from exc
+    out, err = _clean(result.stdout), _clean(result.stderr)
+    combined = "\n".join(filter(None, (out, err)))
+    # Upstream can return status zero for missing interfaces and D-Bus errors.
+    failure = re.search(r"(?im)^(?:error\b|\[ERROR\b|could not connect|missing arg|"
+                        r"no .+ interface found|did not find any interface)", combined)
+    # `info` may append "No aura interface found" after reporting valid platform data.
+    if args and args[0] == "info" and "Supported Core Functions:" in out:
+        failure = re.search(r"(?im)^(?:error\b|\[ERROR\b)", combined)
+    if result.returncode != 0 or failure:
+        raise AsusctlError(combined or f"asusctl encerrou com código {result.returncode}.")
+    return out
 
 
-def _run_raw(*args: str) -> tuple[int, str, str]:
-    """Run asusctl and return (returncode, stdout, stderr)."""
-    cmd = ["asusctl", *args]
+def _read(path: Path) -> str:
     try:
-        r = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
-        return r.returncode, r.stdout.strip(), r.stderr.strip()
-    except FileNotFoundError:
-        return 1, "", "asusctl not found"
-    except subprocess.TimeoutExpired:
-        return 1, "", "timeout"
+        return path.read_text().strip()
+    except OSError:
+        return ""
 
-
-# ─── System / Feature info ────────────────────────────────────────────────────
 
 @dataclass
 class SystemInfo:
     asusctl_version: str = ""
     product_family: str = ""
+    product_name: str = ""
     board_name: str = ""
+    kernel: str = ""
     supported_interfaces: list[str] = field(default_factory=list)
     platform_properties: list[str] = field(default_factory=list)
+    has_profiles: bool = False
+    has_battery_limit: bool = False
+    has_keyboard: bool = False
     has_fan_curves: bool = False
     has_aura: bool = False
-    has_backlight: bool = False
     has_armoury: bool = False
-    has_platform: bool = False
+    daemon_available: bool = False
+    error: str = ""
     raw: str = ""
 
 
 def get_system_info() -> SystemInfo:
-    """Parse `asusctl info` output into a SystemInfo struct."""
-    _, raw, _ = _run_raw("info", "--show-supported")
-    info = SystemInfo(raw=raw)
-
-    for line in raw.splitlines():
-        line = line.strip()
-        if line.startswith("asusctl v"):
-            info.asusctl_version = line.replace("asusctl v", "").strip()
-        elif "Software version:" in line:
-            info.asusctl_version = line.split(":", 1)[1].strip()
-        elif "Product family:" in line:
-            info.product_family = line.split(":", 1)[1].strip()
-        elif "Board name:" in line:
-            info.board_name = line.split(":", 1)[1].strip()
-        elif '"xyz.ljones.' in line or '"org.asuslinux.' in line:
-            iface = line.strip().strip('",')
-            info.supported_interfaces.append(iface)
-
-    # Detect feature availability by probing
-    rc, out, _ = _run_raw("fan-curve", "--mod-profile", "balanced")
-    info.has_fan_curves = rc == 0 and "Error" not in out
-
-    rc, _, _ = _run_raw("aura", "effect")
-    info.has_aura = rc == 0
-
-    rc, out, _ = _run_raw("backlight", "--help")
-    info.has_backlight = rc == 0 and "screenpad" in out
-
-    info.has_armoury = "xyz.ljones.AsusArmoury" in " ".join(info.supported_interfaces)
-    info.has_platform = "xyz.ljones.Platform" in " ".join(info.supported_interfaces)
-
+    dmi = Path("/sys/class/dmi/id")
+    info = SystemInfo(product_family=_read(dmi / "product_family"),
+                      product_name=_read(dmi / "product_name"),
+                      board_name=_read(dmi / "board_name"), kernel=os.uname().release)
+    try:
+        raw = _run("info", "--show-supported")
+        info.raw = raw
+        if "Supported Core Functions:" not in raw:
+            raise AsusctlError("O asusd não informou os recursos disponíveis.")
+        info.daemon_available = True
+        version = re.search(r"(?:asusctl v|Software version:\s*)([^\s]+)", raw)
+        if version:
+            info.asusctl_version = version.group(1)
+        info.supported_interfaces = re.findall(r'"((?:xyz\.ljones|org\.asuslinux)\.[^"\n]+)"', raw)
+        props = re.search(r"Supported Platform Properties:\s*\[([^]]*)\]", raw, re.S)
+        if props:
+            info.platform_properties = re.findall(r"\b[A-Z][A-Za-z0-9]+\b", props.group(1))
+        names = {name.rsplit(".", 1)[-1] for name in info.supported_interfaces}
+        info.has_profiles = "ThrottlePolicy" in info.platform_properties
+        info.has_battery_limit = "ChargeControlEndThreshold" in info.platform_properties
+        info.has_aura = "Aura" in names
+        info.has_fan_curves = "FanCurves" in names
+        info.has_armoury = "AsusArmoury" in names
+    except AsusctlError as exc:
+        info.error = str(exc)
+    # Independent of asusd/Aura: Vivobook exposes asus::kbd_backlight to UPower.
+    try:
+        from .keyboard import get_brightness
+        info.has_keyboard = get_brightness()[1] > 0
+    except AsusctlError:
+        pass
     return info
 
-
-# ─── Profiles ─────────────────────────────────────────────────────────────────
 
 VALID_PROFILES = ("Quiet", "Balanced", "Performance")
 
 
 def get_profiles() -> dict:
-    """Return {'available': [...], 'active': str, 'ac': str, 'battery': str}."""
-    result = {
-        "available": list(VALID_PROFILES),
-        "active": "Balanced",
-        "ac": "",
-        "battery": "",
-    }
-    try:
-        out = _run("profile", "list")
-        lines = [l.strip() for l in out.splitlines() if l.strip()]
-
-        available = []
-        for line in lines:
-            if line in VALID_PROFILES:
-                available.append(line)
-            elif line.startswith("Active profile:"):
-                result["active"] = line.split(":", 1)[1].strip()
-            elif line.startswith("AC profile"):
-                result["ac"] = line.split(None, 2)[-1].strip()
-            elif line.startswith("Battery profile"):
-                result["battery"] = line.split(None, 2)[-1].strip()
-
-        if available:
-            result["available"] = available
-
-        # Also fetch active separately for reliability
-        out2 = _run("profile", "get")
-        for line in out2.splitlines():
-            line = line.strip()
-            if line.startswith("Active profile:"):
-                result["active"] = line.split(":", 1)[1].strip()
-            elif line.startswith("AC profile"):
-                result["ac"] = line.split(None, 2)[-1].strip()
-            elif line.startswith("Battery profile"):
-                result["battery"] = line.split(None, 2)[-1].strip()
-
-    except AsusctlError:
-        pass
-
+    available = [line.strip() for line in _run("profile", "list").splitlines()
+                 if line.strip() in VALID_PROFILES]
+    if not available:
+        raise AsusctlError("Nenhum perfil de energia foi informado pelo asusd.")
+    out = _run("profile", "get")
+    active = re.search(r"Active profile:\s*(\w+)", out)
+    if not active or active.group(1) not in available:
+        raise AsusctlError("Não foi possível identificar o perfil ativo.")
+    result = {"available": available, "active": active.group(1), "ac": "", "battery": ""}
+    for key, label in (("ac", "AC profile"), ("battery", "Battery profile")):
+        match = re.search(rf"{label}\s*:?\s*(\w+)", out)
+        if match and match.group(1) in available:
+            result[key] = match.group(1)
     return result
 
 
-def set_profile(profile_name: str) -> None:
-    """Set the active throttle policy. Raises AsusctlError on failure."""
-    _run("profile", "set", profile_name)
+def set_profile(profile_name: str, source: str = "") -> None:
+    if profile_name not in VALID_PROFILES or source not in ("", "ac", "battery"):
+        raise AsusctlError("Perfil de energia inválido.")
+    options = [f"--{source}"] if source else []
+    _run("profile", "set", *options, profile_name)
 
-
-def next_profile() -> str:
-    """Toggle to the next profile and return the new active profile name."""
-    _run("profile", "next")
-    info = get_profiles()
-    return info.get("active", "")
-
-
-# ─── Battery ──────────────────────────────────────────────────────────────────
 
 def get_battery_limit() -> int:
-    """Return the current battery charge limit (20–100)."""
-    try:
-        out = _run("battery", "info")
-        m = re.search(r"(\d+)\s*%", out)
-        if m:
-            return int(m.group(1))
-    except AsusctlError:
-        pass
-    return 100
+    out = _run("battery", "info")
+    match = re.search(r"(?:charge limit|charge_control_end_threshold)\s*:\s*(\d+)\s*%?", out, re.I)
+    if not match or not 20 <= int(match.group(1)) <= 100:
+        raise AsusctlError("O asusd não informou um limite de carga válido.")
+    return int(match.group(1))
 
 
 def set_battery_limit(limit: int) -> None:
-    """Set battery charge limit. limit must be 20–100."""
-    limit = max(20, min(100, int(limit)))
+    if type(limit) is not int or not 20 <= limit <= 100:
+        raise AsusctlError("O limite deve ser um inteiro entre 20 e 100%.")
     _run("battery", "limit", str(limit))
 
 
-def battery_oneshot(percent: Optional[int] = None) -> None:
-    """Enable one-shot full charge (optionally to a given percent)."""
-    if percent is not None:
-        _run("battery", "oneshot", str(percent))
-    else:
-        _run("battery", "oneshot")
+def battery_oneshot() -> None:
+    _run("battery", "oneshot")
 
 
-# ─── Armoury (firmware attributes) ───────────────────────────────────────────
-
-def get_armoury_attributes() -> dict[str, dict]:
-    """
-    Parse `asusctl armoury list` into a dict of attribute_name → info.
-    Example: {'charge_mode': {'current': '0', 'choices': ['0','1','2']}}
-    """
-    attrs: dict[str, dict] = {}
-    try:
-        out = _run("armoury", "list")
-        current_attr: Optional[str] = None
-        for line in out.splitlines():
-            line = line.strip()
-            if not line:
-                current_attr = None
-                continue
-            if line.endswith(":"):
-                current_attr = line[:-1]
-                attrs[current_attr] = {}
-            elif current_attr and line.startswith("current:"):
-                # e.g. "current: [(0),1,2]"
-                raw = line.split(":", 1)[1].strip()
-                # Extract all numbers; the one in () is current
-                current_match = re.search(r"\((\d+)\)", raw)
-                all_vals = re.findall(r"\d+", raw)
-                attrs[current_attr]["choices"] = all_vals
-                attrs[current_attr]["current"] = (
-                    current_match.group(1) if current_match else (all_vals[0] if all_vals else "0")
-                )
-    except AsusctlError:
-        pass
-    return attrs
-
-
-def set_armoury_attribute(name: str, value: str) -> None:
-    """Set a firmware attribute via asusctl armoury set."""
-    _run("armoury", "set", name, value)
-
-
-def get_armoury_attribute(name: str) -> str:
-    """Get a firmware attribute value."""
-    try:
-        out = _run("armoury", "get", name)
-        lines = [l.strip() for l in out.splitlines() if l.strip()]
-        if lines:
-            return lines[-1]
-    except AsusctlError:
-        pass
-    return ""
-
-
-# ─── Charge mode labels ───────────────────────────────────────────────────────
-
-CHARGE_MODE_LABELS = {
-    "0": "Full Capacity",
-    "1": "Balanced",
-    "2": "Maximum Lifespan",
-}
-
-
-# ─── Fan curves ───────────────────────────────────────────────────────────────
-
-def set_aura_effect(effect: str) -> None:
-    """Set the keyboard aura effect."""
-    _run("aura", "effect", effect)
-
-
-def get_fan_curve(profile: str, fan: str) -> Optional[list[tuple[int, int]]]:
-    """
-    Return fan curve as list of (temp_c, pct) tuples.
-    Returns None if not supported.
-    """
-    try:
-        rc, out, err = _run_raw("fan-curve", "--mod-profile", profile, "--fan", fan)
-        if rc != 0 or "Error" in (out + err):
-            return None
-        # Parse "30c:1%,49c:2%,..." style
-        points = []
-        for token in out.split(","):
-            token = token.strip()
-            m = re.match(r"(\d+)c:(\d+)%?", token)
-            if m:
-                points.append((int(m.group(1)), int(m.group(2))))
-        return points if points else None
-    except Exception:
-        return None
-
-
-def set_fan_curve(profile: str, fan: str, points: list[tuple[int, int]]) -> None:
-    """Set fan curve for a profile/fan from list of (temp_c, pct) tuples."""
-    data = ",".join(f"{t}c:{p}%" for t, p in points)
-    _run("fan-curve", "--mod-profile", profile, "--fan", fan, "--data", data)
+def get_battery_status() -> dict:
+    for path in sorted(Path("/sys/class/power_supply").glob("*")):
+        if _read(path / "type") != "Battery" or _read(path / "present") == "0":
+            continue
+        capacity = _read(path / "capacity")
+        return {"capacity": int(capacity) if capacity.isdigit() else None,
+                "status": _read(path / "status")}
+    return {"capacity": None, "status": ""}

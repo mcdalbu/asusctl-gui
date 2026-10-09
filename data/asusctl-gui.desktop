@@ -1,12 +1,13 @@
 [Desktop Entry]
 Name=ASUS Control
 GenericName=ASUS Laptop Control Panel
-Comment=Manage power profiles, battery, and hardware settings via asusd
+GenericName[pt_BR]=Painel de controle do laptop ASUS
+Comment=Manage power profiles, battery and keyboard illumination
+Comment[pt_BR]=Controle perfis de energia, bateria e iluminação do teclado
 Exec=asusctl-gui
 Icon=asusctl-gui
 Terminal=false
 Type=Application
-Categories=Settings;HardwareSettings;System;
-Keywords=asus;asusd;asusctl;fan;battery;power;rog;profile;
-StartupWMClass=asusctl-gui
-X-GNOME-UsesNotifications=false
+Categories=Settings;HardwareSettings;
+Keywords=asus;vivobook;asusd;asusctl;battery;power;keyboard;
+StartupWMClass=org.asuslinux.AsusctlGui
