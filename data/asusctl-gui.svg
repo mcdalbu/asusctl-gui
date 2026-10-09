@@ -1,41 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128" role="img" aria-labelledby="title description">
+  <title id="title">ASUS Control</title>
+  <desc id="description">Marca ASUS branca sobre um bloco azul, com dois controles de ajuste.</desc>
+  <!-- ASUS wordmark geometry: https://www.asus.com/media/img/2017/images/n-logo-asus.svg -->
   <defs>
-    <linearGradient id="bg-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#141428;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#0d0d1a;stop-opacity:1" />
+    <linearGradient id="tile" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3584e4"/>
+      <stop offset="1" stop-color="#1c71d8"/>
     </linearGradient>
-    <linearGradient id="rog-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#e8294a;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#00d4ff;stop-opacity:1" />
+    <linearGradient id="edge" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1a5fb4"/>
+      <stop offset="1" stop-color="#174b91"/>
     </linearGradient>
-    <filter id="glow">
-      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
-      <feMerge>
-        <feMergeNode in="coloredBlur"/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
-    </filter>
   </defs>
-
-  <!-- Background circle -->
-  <circle cx="64" cy="64" r="60" fill="url(#bg-grad)" />
-  <circle cx="64" cy="64" r="60" fill="none" stroke="url(#rog-grad)" stroke-width="2" opacity="0.6"/>
-
-  <!-- ROG eye / power symbol styled icon -->
-  <!-- Outer ring segments -->
-  <path d="M64 18 A46 46 0 0 1 110 64" fill="none" stroke="#e8294a" stroke-width="6" stroke-linecap="round" filter="url(#glow)"/>
-  <path d="M110 64 A46 46 0 0 1 64 110" fill="none" stroke="#c01f38" stroke-width="4" stroke-linecap="round"/>
-  <path d="M64 110 A46 46 0 0 1 18 64" fill="none" stroke="#009ab8" stroke-width="4" stroke-linecap="round"/>
-  <path d="M18 64 A46 46 0 0 1 64 18" fill="none" stroke="#00d4ff" stroke-width="6" stroke-linecap="round" filter="url(#glow)"/>
-
-  <!-- Inner power icon -->
-  <!-- Vertical bar -->
-  <rect x="61" y="28" width="6" height="28" rx="3" fill="url(#rog-grad)" filter="url(#glow)"/>
-  <!-- Power arc -->
-  <path d="M42 50 A26 26 0 1 0 86 50" fill="none" stroke="url(#rog-grad)" stroke-width="6" stroke-linecap="round" filter="url(#glow)"/>
-
-  <!-- Center dot -->
-  <circle cx="64" cy="64" r="5" fill="#e8294a" filter="url(#glow)"/>
+  <!-- Rounded tile, with a shallow lower edge for the GNOME app grid. -->
+  <rect x="8" y="12" width="112" height="108" rx="26" fill="url(#edge)"/>
+  <rect x="8" y="8" width="112" height="108" rx="26" fill="url(#tile)"/>
+  <path d="M34 9h60a25 25 0 0 1 25 25" fill="none" stroke="#ffffff" stroke-opacity="0.22" stroke-width="2" stroke-linecap="round"/>
+  <!-- The original 400 × 84 wordmark scales to 96 × 20.16. -->
+  <g transform="translate(16 40) scale(0.24)" fill="#ffffff">
+    <path d="M195.2,0.7h-70.5c-16.4,0-23.6,10.2-25.3,20v-20H60.3c-5.5,0-8.1,1.7-10.7,5.5L38.8,21.8h156.4V0.7z" />
+    <polygon points="0,83.3 28.1,83.3 63.3,26.5 38.2,24  " />
+    <rect x="199.4" y="0.7" width="23.1" height="21.1" />
+    <path d="M369.3,33.7l-72.3-4.3c0,11.1,7.3,18.5,19.7,19.5l51.5,4c4,0.3,6.4,1.3,6.4,4.6c0,3.1-2.8,4.3-8.6,4.3   h-70.2v21.5h71.7c22.6,0,32.5-7.9,32.5-25.9C400,41.2,391.1,35.1,369.3,33.7z" />
+    <path d="M296,29.4l-22.8-1.3v24.3c0,7.6-3.8,9.9-17,9.9H238c-10.9,0-15.5-3.1-15.5-9.9V25.8l-23.1-1.7v30.2h-0.5   c-1.3-8.8-4.6-19-26.6-20.5l-72.3-4.8c0,11.1,7.9,17.7,20.3,19l50.4,5.1c4,0.3,6.9,1.5,6.9,4.8c0,3.6-3,4-7.6,4H99.1V29L76,27.5   v55.8h94.1c21,0,27.7-10.9,28.7-20h0.5c2.6,14.4,15.2,20,36.5,20h23.5c24.9,0,36.7-7.6,36.7-25.4V29.4z" />
+    <path d="M398.4,21.8V0.7h-77.6c-16.2,0-23.5,10-24.7,19.7c0,0.1,0,0.2,0,0.3v-20h-22.8v21.1H296H398.4z" />
+  </g>
+  <g stroke="#ffffff" stroke-width="3" stroke-linecap="round">
+    <path d="M43 79h42M43 93h42" stroke-opacity="0.65"/>
+  </g>
+  <g fill="#ffffff">
+    <circle cx="56" cy="79" r="4.5"/>
+    <circle cx="73" cy="93" r="4.5"/>
+  </g>
 </svg>

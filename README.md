@@ -59,7 +59,7 @@ clique em Atualizar no cabeçalho para detectar os controles novamente.
 ```bash
 sudo dnf install rpm-build python3-devel
 ./build_rpm.sh
-sudo dnf install ./build/rpmbuild/RPMS/noarch/asusctl-gui-1.1.0-1.*.noarch.rpm
+sudo dnf install ./build/rpmbuild/RPMS/noarch/asusctl-gui-1.1.0-2.*.noarch.rpm
 ```
 
 O build fica em `build/rpmbuild/`, usa a versão Python da distribuição e não
@@ -93,6 +93,12 @@ configurações, salvando e restaurando os valores originais em `finally`:
 O resultado fica em `build/validation-live.json`. Não é executado pelo build
 RPM nem pela suíte padrão. Não cobre desconexão física da tomada nem um ciclo
 completo de carga. Veja `docs/VALIDACAO.md` para os resultados obtidos.
+
+## Ícone
+
+O ícone vetorial em `data/asusctl-gui.svg` combina a marca ASUS branca,
+um fundo azul arredondado e controles de ajuste. A geometria da marca vem do
+[SVG publicado pela ASUS](https://www.asus.com/media/img/2017/images/n-logo-asus.svg).
 
 ## Referências
 

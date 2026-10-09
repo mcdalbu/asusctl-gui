@@ -1,6 +1,6 @@
 Name:           asusctl-gui
 Version:        1.1.0
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        GTK4/Libadwaita controls for ASUS Vivobook laptops
 License:        GPL-3.0-or-later
 URL:            https://github.com/OpenGamingCollective/asusctl
@@ -48,6 +48,9 @@ install -Dpm644 data/org.asuslinux.AsusctlGui.metainfo.xml %{buildroot}%{_datadi
 %{_datadir}/metainfo/org.asuslinux.AsusctlGui.metainfo.xml
 
 %changelog
+* Fri Oct 09 2026 ASUS Control contributors - 1.1.0-2
+- Replace the application icon with the ASUS wordmark and adjustment controls
+
 * Fri Oct 09 2026 ASUS Control contributors - 1.1.0-1
 - Vivobook capability discovery, UPower keyboard brightness and native adaptive UI
 - Report backend failures and remove unsupported ScreenPad/Aura controls
