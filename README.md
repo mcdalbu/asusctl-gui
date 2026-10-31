@@ -54,17 +54,73 @@ Se o asusd estiver indisponível, a página Sistema mostra o erro e o teclado
 continua disponível quando o UPower responde. Depois de corrigir o serviço,
 clique em Atualizar no cabeçalho para detectar os controles novamente.
 
-## RPM
+## Instalar pelo RPM (Fedora 44)
+
+Baixe `asusctl-gui-1.1.1-1.fc44.noarch.rpm` na
+[release v1.1.1](https://github.com/mca-afk/asusctl-gui/releases/tag/v1.1.1).
+O repositório é privado: é preciso estar autenticado com acesso a ele para baixar.
+Na pasta onde salvou o arquivo, execute:
+
+```bash
+sudo dnf install ./asusctl-gui-1.1.1-1.fc44.noarch.rpm
+```
+
+O DNF baixa e instala automaticamente as dependências e suas dependências
+transitivas pelos repositórios habilitados:
+
+| Dependência | Versão mínima | Função |
+|---|---|---|
+| Python 3 | 3.11 | Execução da aplicação; o RPM também exige o ABI Python da distribuição de build |
+| python3-gobject | 3.42 | Acesso às bibliotecas GTK e D-Bus |
+| gtk4 | 4.10 | Interface gráfica |
+| libadwaita | 1.4 | Componentes nativos do GNOME |
+| asusctl | 6.3.8 | Cliente e daemon de controle do laptop |
+| upower | Fornecida pela distribuição | Iluminação do teclado |
+
+O pacote é uma instalação online: contém a aplicação e os requisitos RPM;
+as bibliotecas são gerenciadas pelo sistema. Use `dnf install`, pois `rpm -ivh`
+sozinho não baixa dependências.
+
+O `asusctl` precisa estar disponível em um repositório habilitado. No Fedora 44
+validado, ele é fornecido pelo COPR `lukenukem/asus-linux`. Se esse repositório
+ainda não estiver configurado e o DNF não encontrar `asusctl >= 6.3.8`, habilite-o
+antes da instalação:
+
+```bash
+sudo dnf copr enable lukenukem/asus-linux
+sudo dnf install ./asusctl-gui-1.1.1-1.fc44.noarch.rpm
+```
+
+Após instalar, abra **ASUS Control** no menu de aplicativos ou execute:
+
+```bash
+asusctl-gui
+```
+
+Se os controles do laptop não aparecerem, consulte os serviços:
+
+```bash
+systemctl status asusd.service upower.service
+```
+
+A release inclui `SHA256SUMS` e um RPM de fontes. Para verificar os arquivos
+que baixou, coloque-os junto ao arquivo de checksums e execute:
+
+```bash
+sha256sum --check --ignore-missing SHA256SUMS
+```
+
+### Construir o RPM
 
 ```bash
 sudo dnf install rpm-build python3-devel
 ./build_rpm.sh
-sudo dnf install ./build/rpmbuild/RPMS/noarch/asusctl-gui-1.1.0-2.*.noarch.rpm
 ```
 
-O build fica em `build/rpmbuild/`, usa a versão Python da distribuição e não
-instala nada no sistema. Após a instalação, abra **ASUS Control** no menu de
-aplicativos ou execute `asusctl-gui`.
+O build gera os RPMs em `build/rpmbuild/` e exporta os arquivos desta versão,
+com checksums, para `build/releases/v1.1.1/`. Nenhum pacote é instalado durante
+o build. O RPM publicado é para Fedora 44; para outra distribuição/versão,
+reconstrua nele para obter os caminhos e o ABI Python correspondentes.
 
 ## Verificação
 

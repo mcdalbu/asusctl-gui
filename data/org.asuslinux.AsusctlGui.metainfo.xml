@@ -17,9 +17,12 @@
     </ul>
   </description>
   <developer id="org.asuslinux.asusctlgui"><name>ASUS Control contributors</name></developer>
-  <url type="homepage">https://github.com/OpenGamingCollective/asusctl</url>
-  <url type="help">https://github.com/OpenGamingCollective/asusctl</url>
+  <url type="homepage">https://github.com/mca-afk/asusctl-gui</url>
+  <url type="help">https://github.com/mca-afk/asusctl-gui/blob/master/README.md</url>
   <provides><binary>asusctl-gui</binary></provides>
   <content_rating type="oars-1.1"/>
-  <releases><release version="1.1.0" date="2026-10-09"/></releases>
+  <releases>
+    <release version="1.1.1" date="2026-10-31"/>
+    <release version="1.1.0" date="2026-10-09"/>
+  </releases>
 </component>
