@@ -17,8 +17,8 @@
     </ul>
   </description>
   <developer id="org.asuslinux.asusctlgui"><name>ASUS Control contributors</name></developer>
-  <url type="homepage">https://github.com/mca-afk/asusctl-gui</url>
-  <url type="help">https://github.com/mca-afk/asusctl-gui/blob/master/README.md</url>
+  <url type="homepage">https://github.com/mcdalbu/asusctl-gui</url>
+  <url type="help">https://github.com/mcdalbu/asusctl-gui/blob/master/README.md</url>
   <provides><binary>asusctl-gui</binary></provides>
   <content_rating type="oars-1.1"/>
   <releases>

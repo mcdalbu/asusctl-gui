@@ -57,7 +57,7 @@ clique em Atualizar no cabeçalho para detectar os controles novamente.
 ## Instalar pelo RPM (Fedora 44)
 
 Baixe `asusctl-gui-1.1.1-1.fc44.noarch.rpm` na
-[release v1.1.1](https://github.com/mca-afk/asusctl-gui/releases/tag/v1.1.1).
+[release v1.1.1](https://github.com/mcdalbu/asusctl-gui/releases/tag/v1.1.1).
 O repositório é privado: é preciso estar autenticado com acesso a ele para baixar.
 Na pasta onde salvou o arquivo, execute:
 

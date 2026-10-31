@@ -3,7 +3,7 @@ Version:        1.1.1
 Release:        1%{?dist}
 Summary:        GTK4/Libadwaita controls for ASUS Vivobook laptops
 License:        GPL-3.0-or-later
-URL:            https://github.com/mca-afk/asusctl-gui
+URL:            https://github.com/mcdalbu/asusctl-gui
 Source0:        %{name}-%{version}.tar.gz
 BuildArch:      noarch
 BuildRequires:  python3-devel
