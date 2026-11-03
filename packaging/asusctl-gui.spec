@@ -1,13 +1,13 @@
 Name:           asusctl-gui
-Version:        1.1.1
+Version:        1.1.2
 Release:        1%{?dist}
 Summary:        GTK4/Libadwaita controls for ASUS Vivobook laptops
 License:        GPL-3.0-or-later
 URL:            https://github.com/mcdalbu/asusctl-gui
 Source0:        %{name}-%{version}.tar.gz
 BuildArch:      noarch
-BuildRequires:  python3-devel
-Requires:       python3 >= 3.11
+BuildRequires:  python3-devel >= 3.15
+Requires:       python3 >= 3.15
 Requires:       python3-gobject >= 3.42
 Requires:       gtk4 >= 4.10
 Requires:       libadwaita >= 1.4
@@ -48,6 +48,10 @@ install -Dpm644 data/org.asuslinux.AsusctlGui.metainfo.xml %{buildroot}%{_datadi
 %{_datadir}/metainfo/org.asuslinux.AsusctlGui.metainfo.xml
 
 %changelog
+* Tue Nov 03 2026 ASUS Control contributors - 1.1.2-1
+- Target Fedora 45 with Python 3.15
+- Rebuild using distribution Python paths and ABI dependencies
+
 * Sat Oct 31 2026 ASUS Control contributors - 1.1.1-1
 - Require the asusctl CLI version used by this interface
 - Document automatic dependency installation with DNF

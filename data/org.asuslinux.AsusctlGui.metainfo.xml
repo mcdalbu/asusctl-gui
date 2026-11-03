@@ -22,6 +22,7 @@
   <provides><binary>asusctl-gui</binary></provides>
   <content_rating type="oars-1.1"/>
   <releases>
+    <release version="1.1.2" date="2026-11-03"/>
     <release version="1.1.1" date="2026-10-31"/>
     <release version="1.1.0" date="2026-10-09"/>
   </releases>

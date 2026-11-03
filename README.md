@@ -23,7 +23,7 @@ página; a aplicação não inventa valores quando uma leitura falha. Use Atuali
 na página para consultar mudanças feitas por atalhos ou outros aplicativos; o
 botão do cabeçalho refaz a detecção dos recursos.
 
-Na instalação consultada (Fedora 44, asusctl 6.3.8), o asusd informa
+Na instalação consultada originalmente (Fedora 44, asusctl 6.3.8), o asusd informa
 `ThrottlePolicy` e `ChargeControlEndThreshold`. Não oferece interfaces Aura,
 FanCurves ou AsusArmoury. A interface Backlight do daemon, por si só, não
 comprova a presença de um ScreenPad. Por isso a GUI não oferece controles de
@@ -33,7 +33,11 @@ família S5406. A GUI não adiciona suporte ausente no kernel/firmware/daemon.
 
 ## Executar
 
-Requisitos: Python 3.11+, PyGObject, GTK 4.10+, Libadwaita 1.4+, asusctl com os
+Plataforma alvo: **Fedora 45 com Python 3.15**.
+O Fedora 45 usa Python 3.15 como Python do sistema, conforme a
+[documentação do Fedora](https://fedoraproject.org/wiki/Changes/Python3.15).
+
+Requisitos: Python 3.15+, PyGObject, GTK 4.10+, Libadwaita 1.4+, asusctl com os
 subcomandos `profile list/get/set` e `battery info/limit/oneshot`, e UPower.
 
 No Fedora, com um repositório que forneça asusctl já configurado:
@@ -54,15 +58,22 @@ Se o asusd estiver indisponível, a página Sistema mostra o erro e o teclado
 continua disponível quando o UPower responde. Depois de corrigir o serviço,
 clique em Atualizar no cabeçalho para detectar os controles novamente.
 
-## Instalar pelo RPM (Fedora 44)
+## Instalar pelo RPM (Fedora 45)
 
-Baixe `asusctl-gui-1.1.1-1.fc44.noarch.rpm` na
-[release v1.1.1](https://github.com/mcdalbu/asusctl-gui/releases/tag/v1.1.1).
+Baixe `asusctl-gui-1.1.2-1.fc45.noarch.rpm` na
+[release v1.1.2](https://github.com/mcdalbu/asusctl-gui/releases/tag/v1.1.2).
 O repositório é privado: é preciso estar autenticado com acesso a ele para baixar.
-Na pasta onde salvou o arquivo, execute:
+Na pasta onde salvou o arquivo, instale ou atualize a versão anterior:
 
 ```bash
-sudo dnf install ./asusctl-gui-1.1.1-1.fc44.noarch.rpm
+sudo dnf install ./asusctl-gui-1.1.2-1.fc45.noarch.rpm
+```
+
+Para construir o pacote localmente no Fedora 45, veja abaixo. O RPM gerado
+fica em `build/releases/v1.1.2/` e pode ser instalado a partir da pasta do projeto:
+
+```bash
+sudo dnf install ./build/releases/v1.1.2/asusctl-gui-1.1.2-1.fc45.noarch.rpm
 ```
 
 O DNF baixa e instala automaticamente as dependências e suas dependências
@@ -70,7 +81,7 @@ transitivas pelos repositórios habilitados:
 
 | Dependência | Versão mínima | Função |
 |---|---|---|
-| Python 3 | 3.11 | Execução da aplicação; o RPM também exige o ABI Python da distribuição de build |
+| Python 3 | 3.15 | Execução da aplicação; o RPM também exige o ABI Python da distribuição de build |
 | python3-gobject | 3.42 | Acesso às bibliotecas GTK e D-Bus |
 | gtk4 | 4.10 | Interface gráfica |
 | libadwaita | 1.4 | Componentes nativos do GNOME |
@@ -88,7 +99,7 @@ antes da instalação:
 
 ```bash
 sudo dnf copr enable lukenukem/asus-linux
-sudo dnf install ./asusctl-gui-1.1.1-1.fc44.noarch.rpm
+sudo dnf install ./build/releases/v1.1.2/asusctl-gui-1.1.2-1.fc45.noarch.rpm
 ```
 
 Após instalar, abra **ASUS Control** no menu de aplicativos ou execute:
@@ -103,8 +114,8 @@ Se os controles do laptop não aparecerem, consulte os serviços:
 systemctl status asusd.service upower.service
 ```
 
-A release inclui `SHA256SUMS` e um RPM de fontes. Para verificar os arquivos
-que baixou, coloque-os junto ao arquivo de checksums e execute:
+A release e o build local incluem `SHA256SUMS` e um RPM de fontes. Para verificar
+os arquivos, entre na pasta com os RPMs e o arquivo de checksums e execute:
 
 ```bash
 sha256sum --check --ignore-missing SHA256SUMS
@@ -114,13 +125,15 @@ sha256sum --check --ignore-missing SHA256SUMS
 
 ```bash
 sudo dnf install rpm-build python3-devel
+/usr/bin/python3 --version  # deve ser 3.15 no Fedora 45
 ./build_rpm.sh
 ```
 
 O build gera os RPMs em `build/rpmbuild/` e exporta os arquivos desta versão,
-com checksums, para `build/releases/v1.1.1/`. Nenhum pacote é instalado durante
-o build. O RPM publicado é para Fedora 44; para outra distribuição/versão,
-reconstrua nele para obter os caminhos e o ABI Python correspondentes.
+com checksums, para `build/releases/v1.1.2/`. Nenhum pacote é instalado durante
+o build. O RPM para Fedora 45 usa `/usr/lib/python3.15/site-packages` e exige
+`python(abi) = 3.15`. Um RPM antigo de Fedora 44 deve ser substituído pelo
+novo build, pois seus caminhos e ABI pertencem ao Python anterior.
 
 ## Verificação
 
